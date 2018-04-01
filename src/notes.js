@@ -3,64 +3,50 @@ const _ = require('lodash');
 
 var addNote = (title, body) => {
     var note = {
+        title,
         body,
-    }
+    };
 
-    if (checkFileExists(title)) {
-        console.log('note already exists...use update...or change title');
-        return;
-    } else {
-        saveNote(note, title);
+    var notes = fetchNotes();
+    
+    var duplicateNotes = notes.filter( note => note.title === title );
+
+    if(duplicateNotes.length === 0) {
+        notes.push(note);
+        saveNote(notes);
+        return note;
     }
 };
 
 var getAll = () => {
-    console.log('Getting notes');
+    return fetchNotes();
 };
 
 var deleteNote = (title) => {
-    console.log('deleting');
-
-    if (checkFileExists(title)) {
-        fs.unlinkSync(`../notes/${title}.json`);
-    } else {
-        console.log('file does not exists');
-    }
+    var notes = fetchNotes();
+    notes = notes.filter( note => note.title !== title );
+    saveNote(notes);
 };
 
 var getNote = (title) => {
-    console.log('getting a particular note');
-
-    if (checkFileExists(title)) {
-        console.log(fetchNote(title).body);
-    } else {
-        console.log('note does not exists');
-    }
+    var notes = fetchNotes();
+    var getNote = notes.filter( note => note.title === title );
+    return getNote[0];
 };
 
 var updateNote = (title, body) => {
-
-    if(checkFileExists(title)) {
-        fetchNote(title).body = body;
-    } else {
-        console.log('note not exists');
-    }
 }
 
-const fetchNote = (title) => {
+const fetchNotes = () => {
     try {
-        return JSON.parse(fs.readFileSync(`../notes/${title}.json`));
+        return JSON.parse(fs.readFileSync('../notes/notes-data.json'));
     } catch (err) {
-        return null;
+        return [];
     }
 }
 
-const saveNote = (note) => {
-    fs.writeFileSync(`../notes/${title}.json`, JSON.stringify(note));
-}
-
-const checkFileExists = (title) => {
-    return fs.existsSync(`..notes/${title}.json`);
+const saveNote = (notes) => {
+    fs.writeFileSync('../notes/notes-data.json', JSON.stringify(notes));
 }
 
 module.exports = { addNote, getAll, deleteNote, getNote };
