@@ -1,52 +1,75 @@
 const fs = require('fs');
 const _ = require('lodash');
 
-var addNote = (title, body) => {
+var addNote = (title, head, body) => {
     var note = {
-        title,
+        head,
         body,
     };
 
-    var notes = fetchNotes();
-    
-    var duplicateNotes = notes.filter( note => note.title === title );
-
-    if(duplicateNotes.length === 0) {
-        notes.push(note);
-        saveNote(notes);
+    if (checkFileExists(title)) {
+        console.log('file already exists');
+    } else {
+        saveNote(title, note);
         return note;
     }
 };
 
 var getAll = () => {
-    return fetchNotes();
+    fetchNotes();
 };
 
 var deleteNote = (title) => {
     var notes = fetchNotes();
-    notes = notes.filter( note => note.title !== title );
+    notes = notes.filter(note => note.title !== title);
     saveNote(notes);
 };
 
 var getNote = (title) => {
-    var notes = fetchNotes();
-    var getNote = notes.filter( note => note.title === title );
-    return getNote[0];
+    if(checkFileExists(title)) {
+        var note = fetchNote(title);
+        var note = notes.filter(note => note.head === head);
+        return note[0];
+    } else {
+        console.log('note file does not exists');
+    }
 };
 
-var updateNote = (title, body) => {
+var updateNote = (title, head, body) => {
+    if (fs.existsSync(`../notes/${title}.json`)) {
+        var notes = fetchNoteContent(title);
+        var note = notes.filter(note => note.head === head);
+
+        note.head = body;
+        notes.push(note);
+        saveNote(notes);
+    } else {
+        console.log('note file does not exists');
+    }
 }
 
-const fetchNotes = () => {
+const fetchNoteContent = (title) => {
     try {
-        return JSON.parse(fs.readFileSync('../notes/notes-data.json'));
+        return JSON.parse(fs.readFileSync(`../notes/${title}.json`));
     } catch (err) {
         return [];
     }
 }
 
-const saveNote = (notes) => {
-    fs.writeFileSync('../notes/notes-data.json', JSON.stringify(notes));
+const fetchNotes = () => {
+    fs.readdirSync('../notes').forEach( file => {
+        var noteList = JSON.parse(fs.readFileSync(`../notes/${file}`));
+        console.log(`Notes in ${file}:-`);
+        notesList.forEach(element => console.log(element));
+    });
+};
+
+const saveNote = (title, note) => {
+    fs.writeFileSync(`../notes/${title}.json`, JSON.stringify(note));
+}
+
+const checkFileExists = (title) => {
+    return fs.existsSync(`../notes/${title}.json`);
 }
 
 module.exports = { addNote, getAll, deleteNote, getNote };
