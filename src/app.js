@@ -15,6 +15,8 @@ if (command === 'add') {
     notes.deleteNote(argv.title);
 } else if (command === 'read') {
     notes.getNote(argv.title);
+} else if (command === 'update') {
+    notes.updateNote(argv.title, argv.body);
 } else {
     console.log('command not recognized');
 }
