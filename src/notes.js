@@ -1,54 +1,71 @@
 const fs = require('fs');
-const _ = require('lodash');
 
-var addNote = (col, title, body) => {
-  var note = {
+const fetchNoteContent = (title) => {
+  try {
+    return JSON.parse(fs.readFileSync(`../notes/${title}.json`));
+  } catch (err) {
+    return [];
+  }
+};
+
+const fetchNotes = () => {
+  fs.readdirSync('../notes').forEach((file) => {
+    const notesList = JSON.parse(fs.readFileSync(`../notes/${file}`));
+    console.log(`Notes in ${file}:-`);
+    notesList.forEach(element => console.log(element));
+  });
+};
+
+const saveNote = (col, note) => {
+  fs.writeFileSync(`../notes/${col}.json`, JSON.stringify(note));
+};
+
+const checkFileExists = col => fs.existsSync(`../notes/${col}.json`);
+
+const addNote = (col, title, body) => {
+  const note = {
     title,
     body,
   };
 
   if (checkFileExists(col)) {
-    var notes = fetchNoteContent(col);
+    const notes = fetchNoteContent(col);
     notes.push(note);
-  };
+  }
 
   saveNote(col, note);
   return note;
 };
 
-var getAllCollections = () => {
+const getAllCollections = () => {
   fetchNotes();
 };
 
-var getAllNotesInCollection = (col) => {
+const getAllNotesInCollection = (col) => {
   fetchNoteContent(col);
-}
-
-var deleteCollection = (col) => {
-  return fs.unlinkSync(`../notes/${col}.json`);
 };
 
-var deleteNoteInCollection = (col, title) => {
-  var notes = fetchNoteContent(col);
+const deleteCollection = col => fs.unlinkSync(`../notes/${col}.json`);
+
+const deleteNoteInCollection = (col, title) => {
+  let notes = fetchNoteContent(col);
   notes = notes.filter(note => note.title !== title);
   saveNote(notes);
-}
+};
 
-var getNote = (col, title) => {
+const getNote = (col, title) => {
   if (checkFileExists(col)) {
-    var note = fetchNoteContent(col);
-    var note = notes.filter(note => note.title === title);
-    return note[0];
-  } else {
-    console.log('note file does not exists');
+    const notes = fetchNoteContent(col);
+    const fetchNote = notes.filter(note => note.title === title);
+    return fetchNote[0];
   }
 };
 
-var updateBody = (col, title, body) => {
+const updateBody = (col, title, body) => {
   if (fs.existsSync(`../notes/${col}.json`)) {
-    var notes = fetchNoteContent(col);
-    var note = notes.filter(note => note.head === head);
-    if(note.length === 0) {
+    const notes = fetchNoteContent(col);
+    const note = notes.filter(n => n.head === title);
+    if (note.length === 0) {
       console.log('title does not exists');
       return;
     }
@@ -58,30 +75,14 @@ var updateBody = (col, title, body) => {
   } else {
     console.log('note file does not exists');
   }
-}
-
-const fetchNoteContent = (title) => {
-  try {
-    return JSON.parse(fs.readFileSync(`../notes/${title}.json`));
-  } catch (err) {
-    return [];
-  }
-}
-
-const fetchNotes = () => {
-  fs.readdirSync('../notes').forEach(file => {
-    var noteList = JSON.parse(fs.readFileSync(`../notes/${file}`));
-    console.log(`Notes in ${file}:-`);
-    notesList.forEach(element => console.log(element));
-  });
 };
-
-const saveNote = (col, note) => {
-  fs.writeFileSync(`../notes/${col}.json`, JSON.stringify(note));
-}
-
-const checkFileExists = (col) => {
-  return fs.existsSync(`../notes/${col}.json`);
-}
-
-module.exports = { addNote, getAllCollections, getAllNotesInCollection, deleteNoteInCollection, deleteCollection, getNote, updateBody };
+module.exports =
+{
+  addNote,
+  getAllCollections,
+  getAllNotesInCollection,
+  deleteNoteInCollection,
+  deleteCollection,
+  getNote,
+  updateBody,
+};
