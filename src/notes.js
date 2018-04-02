@@ -84,4 +84,4 @@ const checkFileExists = (col) => {
   return fs.existsSync(`../notes/${col}.json`);
 }
 
-module.exports = { addNote, getAllCollections, getAllNotesInCollection, deleteNote, getNote };
+module.exports = { addNote, getAllCollections, getAllNotesInCollection, deleteNoteInCollection, deleteCollection, getNote, updateBody };
