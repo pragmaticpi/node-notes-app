@@ -1,75 +1,87 @@
 const fs = require('fs');
 const _ = require('lodash');
 
-var addNote = (title, head, body) => {
-    var note = {
-        head,
-        body,
-    };
+var addNote = (col, title, body) => {
+  var note = {
+    title,
+    body,
+  };
 
-    if (checkFileExists(title)) {
-        console.log('file already exists');
-    } else {
-        saveNote(title, note);
-        return note;
+  if (checkFileExists(col)) {
+    var notes = fetchNoteContent(col);
+    notes.push(note);
+  };
+
+  saveNote(col, note);
+  return note;
+};
+
+var getAllCollections = () => {
+  fetchNotes();
+};
+
+var getAllNotesInCollection = (col) => {
+  fetchNoteContent(col);
+}
+
+var deleteCollection = (col) => {
+  return fs.unlinkSync(`../notes/${col}.json`);
+};
+
+var deleteNoteInCollection = (col, title) => {
+  var notes = fetchNoteContent(col);
+  notes = notes.filter(note => note.title !== title);
+  saveNote(notes);
+}
+
+var getNote = (col, title) => {
+  if (checkFileExists(col)) {
+    var note = fetchNoteContent(col);
+    var note = notes.filter(note => note.title === title);
+    return note[0];
+  } else {
+    console.log('note file does not exists');
+  }
+};
+
+var updateBody = (col, title, body) => {
+  if (fs.existsSync(`../notes/${col}.json`)) {
+    var notes = fetchNoteContent(col);
+    var note = notes.filter(note => note.head === head);
+    if(note.length === 0) {
+      console.log('title does not exists');
+      return;
     }
-};
-
-var getAll = () => {
-    fetchNotes();
-};
-
-var deleteNote = (title) => {
-    var notes = fetchNotes();
-    notes = notes.filter(note => note.title !== title);
+    note.head = body;
+    notes.push(note);
     saveNote(notes);
-};
-
-var getNote = (title) => {
-    if(checkFileExists(title)) {
-        var note = fetchNote(title);
-        var note = notes.filter(note => note.head === head);
-        return note[0];
-    } else {
-        console.log('note file does not exists');
-    }
-};
-
-var updateNote = (title, head, body) => {
-    if (fs.existsSync(`../notes/${title}.json`)) {
-        var notes = fetchNoteContent(title);
-        var note = notes.filter(note => note.head === head);
-
-        note.head = body;
-        notes.push(note);
-        saveNote(notes);
-    } else {
-        console.log('note file does not exists');
-    }
+  } else {
+    console.log('note file does not exists');
+  }
 }
 
 const fetchNoteContent = (title) => {
-    try {
-        return JSON.parse(fs.readFileSync(`../notes/${title}.json`));
-    } catch (err) {
-        return [];
-    }
+  try {
+    return JSON.parse(fs.readFileSync(`../notes/${title}.json`));
+  } catch (err) {
+    return [];
+  }
 }
 
 const fetchNotes = () => {
-    fs.readdirSync('../notes').forEach( file => {
-        var noteList = JSON.parse(fs.readFileSync(`../notes/${file}`));
-        console.log(`Notes in ${file}:-`);
-        notesList.forEach(element => console.log(element));
-    });
+  fs.readdirSync('../notes').forEach(file => {
+    var noteList = JSON.parse(fs.readFileSync(`../notes/${file}`));
+    console.log(`Notes in ${file}:-`);
+    notesList.forEach(element => console.log(element));
+  });
 };
 
-const saveNote = (title, note) => {
-    fs.writeFileSync(`../notes/${title}.json`, JSON.stringify(note));
+const saveNote = (col, note) => {
+  fs.writeFileSync(`../notes/${col}.json`, JSON.stringify(note));
 }
 
-const checkFileExists = (title) => {
-    return fs.existsSync(`../notes/${title}.json`);
+const checkFileExists = (col) => {
+  return fs.existsSync(`../notes/${col}.json`);
 }
 
-module.exports = { addNote, getAll, deleteNote, getNote };
+module.exports = { addNote, getAllCollections, getAllNotesInCollection, deleteNote, getNote };
